@@ -5,7 +5,7 @@ import math
 from sklearn.cluster import MiniBatchKMeans
 import numpy as np
 
-ic.disable()
+# ic.disable()
 
 class Stitch:
 
@@ -43,8 +43,11 @@ class Stitch:
 # first = Stitch()
 class Pattern:
 
+    co_ords: () #(row, col)
+    height: int
+    width: int
     image: np.ndarray
-    desired_width = 10
+    number_of_pixels_per_stitch = 10
     number_of_pixels_per_10_stitch = 100
     background: np.ndarray
     black = 0
@@ -53,6 +56,23 @@ class Pattern:
 
     def __init__(self, path):
         self.image = cv.imread(path)
+        self.height, self.width = self.image.shape[:2]
+
+    def __iter__(self):
+        self.co_ords = (0, 0)
+        return self
+
+    def __next__(self):
+        if self.co_ords[0] <= self.height - self.number_of_pixels_per_stitch:
+            if self.co_ords[1] <= self.width - self.number_of_pixels_per_stitch:
+                self.co_ords = (self.co_ords[1]+10)
+            elif self.co_ords[1] >= self.width:
+                self.co_ords[1] == 0
+                self.co_ords = (self.co_ords[0] + 10)
+        elif self.co_ords[0] <= self.height:
+            self.co_ords = (0, 0)
+        return self
+
 
     def show_image(self):
         cv.namedWindow("Display, cv.WINDOW_AUTOSIZE")
@@ -203,11 +223,16 @@ class Pattern:
         # cv.imshow("Display", quant)
         # cv.waitKey(0)
         # cv.destroyAllWindows()
-
-path_to_image = r"dinosaur1.jpg"
+#
+path_to_image = r"images\dinosaur1.jpg"
 width_end_product = 40
 pattern = Pattern(path_to_image)
-pattern.preprocess_image()
-pattern.process_image(width_end_product)
-pattern.make_background(width_end_product)
-pattern.map_image_to_background()
+ic(pattern.height)
+ic(pattern.width)
+for i in iter(pattern):
+    # ic(pattern.co_ords[0])
+    ic(pattern.co_ords[1])
+# pattern.preprocess_image()
+# pattern.process_image(width_end_product)
+# pattern.make_background(width_end_product)
+# pattern.map_image_to_background()
