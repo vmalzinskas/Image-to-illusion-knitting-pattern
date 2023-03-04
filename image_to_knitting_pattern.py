@@ -43,7 +43,6 @@ class Stitch:
 # first = Stitch()
 class Pattern:
 
-    co_ords: () #(row, col)
     height: int
     width: int
     image: np.ndarray
@@ -57,22 +56,6 @@ class Pattern:
     def __init__(self, path):
         self.image = cv.imread(path)
         self.height, self.width = self.image.shape[:2]
-
-    def __iter__(self):
-        self.co_ords = (0, 0)
-        return self
-
-    def __next__(self):
-        if self.co_ords[0] <= self.height - self.number_of_pixels_per_stitch:
-            if self.co_ords[1] <= self.width - self.number_of_pixels_per_stitch:
-                self.co_ords = (self.co_ords[1]+10)
-            elif self.co_ords[1] >= self.width:
-                self.co_ords[1] == 0
-                self.co_ords = (self.co_ords[0] + 10)
-        elif self.co_ords[0] <= self.height:
-            self.co_ords = (0, 0)
-        return self
-
 
     def show_image(self):
         cv.namedWindow("Display, cv.WINDOW_AUTOSIZE")
@@ -223,15 +206,57 @@ class Pattern:
         # cv.imshow("Display", quant)
         # cv.waitKey(0)
         # cv.destroyAllWindows()
-#
-path_to_image = r"images\dinosaur1.jpg"
-width_end_product = 40
-pattern = Pattern(path_to_image)
-ic(pattern.height)
-ic(pattern.width)
-for i in iter(pattern):
-    # ic(pattern.co_ords[0])
-    ic(pattern.co_ords[1])
+
+class Canvas:
+
+    number_of_stitch_per_red_square = 10
+    height: int
+    width: int
+    co_ords: ()
+
+    def __init__(self, height, width): # h and w in red square values
+        self.height = height
+        self.width = width
+
+    def __iter__(self):
+        self.co_ords = (0, 0)
+        return self
+
+    def __next__(self):
+        x = (self.co_ords[0], self.co_ords[1])
+        if x == (self.height, self.width):
+            raise StopIteration
+        row = self.co_ords[0]
+        col = self.co_ords[1]
+        last_row = (self.height - 1)
+        last_col = (self.width)
+
+        if row < last_row:
+            if col < last_col:
+                self.co_ords = (row, col + 1)
+            elif col == last_col:
+                self.co_ords = (row + 1, 0)
+        elif row == last_row:
+            if col < last_col:
+                self.co_ords = (row, col+1)
+            elif col == last_col:
+                self.co_ords = (0, 0)
+                raise StopIteration
+        return x
+
+# path_to_image = r"images\dinosaur1.jpg"
+# width_end_product = 40
+# pattern = Pattern(path_to_image)
+
+canvas1 = Canvas(5, 5)
+
+# ic(canvas1.height)
+# ic(canvas1.width)
+for i in canvas1:
+    ic(i)
+ic("\n")
+for i in canvas1:
+    ic(i)
 # pattern.preprocess_image()
 # pattern.process_image(width_end_product)
 # pattern.make_background(width_end_product)
